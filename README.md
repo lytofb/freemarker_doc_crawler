@@ -1,5 +1,5 @@
 # freemarker_doc_crawler
-通过本工程可以将http://freemarker.org/docs/的文档下载到本地
+通过本工程可以将 http://freemarker.org/docs/ 的文档下载到本地
 
 ## 运行依赖
 requests,bs4

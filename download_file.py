@@ -11,7 +11,10 @@ def makedirs(path):
         return False
 
 def download_file_by_url(localpath,httpurl):
-    import requests;
+    import requests,os;
+    if os.path.exists(localpath):
+        print(localpath+" exists")
+        return
     print("begin download "+httpurl+"save to "+localpath)
     r = requests.get(httpurl)
     if r.status_code==200:

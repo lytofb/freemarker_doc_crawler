@@ -1,8 +1,10 @@
 __author__ = 'root'
-import requests;import os;
+import requests;
+import os;
 from bs4 import BeautifulSoup;
 import download_file;
 import re;
+import config;
 
 def getsession():
     headers = {"Accept":'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -32,10 +34,10 @@ def get_next_page_node_attrs(soup):
     return next_tag.attrs
 
 def download_page_resource(entry_url):
-    baseurl = "http://freemarker.org/docs/"
-    html_local_path = "D:\\build\\freemarker"
-    js_local_path = "D:\\build\\freemarker\\js"
-    css_local_path = "D:\\build\\freemarker\\css"
+    baseurl = config.pathconfig["baseurl"]
+    html_local_path = config.pathconfig["html_local_path"]
+    js_local_path = config.pathconfig["js_local_path"]
+    css_local_path = config.pathconfig["css_local_path"]
     print("begin download "+entry_url)
     download_file.download_file_by_url(os.path.join(html_local_path,entry_url.split("/")[-1]),entry_url)
     soup = getsoup_by_url(entry_url)
@@ -59,15 +61,15 @@ def download_page_resource(entry_url):
         print("download end")
 
 if __name__=='__main__':
-    url = "http://freemarker.org/docs/index.html";
-    download_page_resource(url)
+    indexurl = "http://freemarker.org/docs/index.html";
+    download_page_resource(indexurl)
 
-    local_path = "D:\\build\\freemarker\\docgen-resources"
-    with open("D:\\build\\freemarker"+"\\docgen-resources\\docgen.min.css","r") as cssfile:
+    local_path = os.path.join(config.pathconfig["html_local_path"],"docgen-resources")#"D:\\build\\freemarker\\docgen-resources"
+    with open(os.path.join(local_path,"docgen.min.css"),"r") as cssfile:
         css_content =cssfile.read();
         print(css_content)
         extra_resource_list = re.findall('url\((.*?)\)',css_content);
         for url in extra_resource_list:
-            resource_url = "http://freemarker.org/docs/docgen-resources/"+url;
+            resource_url = config.pathconfig["baseurl"]+"docgen-resources/"+url;
             download_file.makedirs(os.path.split(os.path.join(local_path,url.replace("/","\\")))[0])
             download_file.download_file_by_url(os.path.join(local_path,url.replace("/","\\")).split("?")[0],resource_url)
