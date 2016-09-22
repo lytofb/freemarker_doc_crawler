@@ -47,18 +47,46 @@ def download_page_resource(entry_url):
     css_resource = soup.select("link")
     css_tag_list = list(filter(lambda x: 'href' in x.attrs and (len(x.attrs['href'])<4 or x.attrs['href'][0:4]!='http'), css_resource))
     css_resource_url_list = get_css_resource_url(baseurl,css_tag_list);
+    download_js_args = []
+    download_css_args = []
     for url in script_resource_url_list:
-        download_file.makedirs(os.path.split(os.path.join(js_local_path,url["relative"].replace("/","\\")))[0])
-        download_file.download_file_by_url(os.path.join(js_local_path,url["relative"].replace("/","\\")),url["absolute"])
+        download_js_tuple = (os.path.join(js_local_path,url["relative"].replace("/","\\")),url["absolute"])
+        download_js_args.append(download_js_tuple)
+        # download_file.makedirs(os.path.split(os.path.join(js_local_path,url["relative"].replace("/","\\")))[0])
+        # download_file.download_file_by_url(os.path.join(js_local_path,url["relative"].replace("/","\\")),url["absolute"])
+    DownloadModule().runMulti(makedir_download,download_js_args)
     for url in css_resource_url_list:
-        download_file.makedirs(os.path.split(os.path.join(css_local_path,url["relative"].replace("/","\\")))[0])
-        download_file.download_file_by_url(os.path.join(css_local_path,url["relative"].replace("/","\\")),url["absolute"])
+        download_css_tuple = (os.path.join(css_local_path,url["relative"].replace("/","\\")),url["absolute"])
+        download_css_args.append(download_css_tuple)
+        # download_file.makedirs(os.path.split(os.path.join(css_local_path,url["relative"].replace("/","\\")))[0])
+        # download_file.download_file_by_url(os.path.join(css_local_path,url["relative"].replace("/","\\")),url["absolute"])
+    DownloadModule().runMulti(makedir_download,download_css_args)
     next_node_resource = get_next_page_node_attrs(soup);
     if 'href' in next_node_resource:
         next_url = next_node_resource['href']
         download_page_resource(baseurl+next_url)
     else:
         print("download end")
+def makedir_download(local_path,url):
+    download_file.makedirs(os.path.split(local_path)[0])
+    download_file.download_file_by_url(local_path,url)
+
+class DownloadModule(object):
+
+    def downFileMulti(self,downloadList,foo):
+        import threading;
+        task_threads=[]
+        for downLoad in downloadList:
+            t= threading.Thread( target=foo,args=(downLoad["url"],downLoad["filename"]) )
+            t.start();
+            task_threads.append(t)
+        for task in task_threads:
+            task.join();
+    def runMulti(self,foo,argslist):
+        import threading;
+        for arg in argslist:
+            t = threading.Thread(target=foo,args=arg)
+            t.start()
 
 if __name__=='__main__':
     indexurl = "http://freemarker.org/docs/index.html";
