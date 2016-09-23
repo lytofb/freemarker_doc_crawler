@@ -6,20 +6,25 @@ import download_file;
 import re;
 import config;
 
-def getsession():
-    headers = {"Accept":'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-               'Accept-Encoding':'gzip, deflate, sdch',
-               'Accept-Language':'zh-CN,zh;q=0.8',
-               'Upgrade-Insecure-Requests':1,
-               'Connection':'keep-alive,Host:freemarker.org',
-               'User-Agent':"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36'"}
+def getsession(header_para = None):
+    if header_para:
+        headers = header_para
+    else :
+        headers = {"Accept":'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                   'Accept-Encoding':'gzip, deflate, sdch',
+                   'Accept-Language':'zh-CN,zh;q=0.8',
+                   'Upgrade-Insecure-Requests':1,
+                   'Connection':'keep-alive,Host:freemarker.org',
+                   'User-Agent':"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36'"}
     req_session = requests.session();
     req_session.headers.update(headers)
     return req_session;
 
-def getsoup_by_url(url):
-    session = getsession();
+def getsoup_by_url(url,header=None,encoding=None):
+    session = getsession(header);
     response = session.get(url)
+    if encoding:
+        response.encoding = encoding;
     soup = BeautifulSoup(response.text, "html.parser")
     return soup;
 
