@@ -1,8 +1,4 @@
 __author__ = 'root'
-import requests;
-import os;
-from bs4 import BeautifulSoup;
-import download_file;
 import request_class;
 lianjia_detail_url = "http://dl.lianjia.com/ershoufang/"
 
