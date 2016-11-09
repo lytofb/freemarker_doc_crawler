@@ -53,6 +53,26 @@ class SQLiteWraper(object):
         return 0
 
     @conn_trans
+    def select(self,sql,conn=None):
+        resultdictlist = []
+        trans = conn.begin()
+        try:
+            result = conn.execute(sql)
+            for row in result:
+                resultdict={};
+                for t in row.items():
+                    resultdict[t[0]] = t[1]
+                resultdictlist.append(resultdict)
+            trans.commit()
+        except pymysql.IntegrityError as e:
+            #print e
+            return -1
+        except Exception as e:
+            print (e)
+            return -2
+        return resultdictlist
+
+    @conn_trans
     def execute(self,sql,conn=None):
         trans = conn.begin()
         try:
@@ -78,12 +98,12 @@ class SQLiteWraper(object):
         return x
 if __name__=='__main__':
     db = SQLiteWraper('developer','developer','172.28.217.66','xixiche');
-    # data_merchant = db.execute("select * from data_merchant")
-    # for row in data_merchant:
-    #     print(row.items())
-    print(db.sqrt(100))
-    testsql = [];
-    for i in range(1,10):
-        testsql.append("insert into test (name,test_bigint) values ('hehe','"+str(i)+"')")
-    print("sqllist prepared")
-    db.batch(testsql)
+    data_merchant = db.select("select * from data_merchant")
+    for row in data_merchant:
+        print(row.items())
+    # print(db.sqrt(100))
+    # testsql = [];
+    # for i in range(1,10):
+    #     testsql.append("insert into test (name,test_bigint) values ('hehe','"+str(i)+"')")
+    # print("sqllist prepared")
+    # db.batch(testsql)

@@ -15,11 +15,13 @@ if __name__=="__main__":
                   help="write report to FILE",default="/home/dev/githubClone/shadowsocks")
     (options, args) = parser.parse_args();
     import pdb;pdb.set_trace();
-    db = SQLiteWraper();
+    db = SQLiteWraper('developer','developer','172.28.217.66','walkdir');
     for root, dirs, files, rootfd in os.fwalk(options.dirname):
         #print(root, dirs, files, rootfd)
         for f in files:
             appendfix = getappendfix(f)
             filehere = os.path.join(root,f)
-            insertsql = "insert into filedict (filedir,filename,appendfix) values ('"+filehere+"','"+f+"','"+appendfix+"')"
-            db.execute(insertsql)
+            dbresult = db.select("select * from filedict where filedir = '"+filehere+"'")
+            if(len(dbresult)==0):
+                insertsql = "insert into filedict (filedir,filename,appendfix) values ('"+filehere+"','"+f+"','"+appendfix+"')"
+                db.execute(insertsql)
