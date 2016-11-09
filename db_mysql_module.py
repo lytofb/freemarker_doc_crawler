@@ -4,9 +4,9 @@ import sqlalchemy;
 import threading;
 from time import clock;
 class SQLiteWraper(object):
-    def __init__(self):
+    def __init__(self,username,password,host,dbname):
         # self.lock = threading.RLock()
-        self.engine = sqlalchemy.create_engine('mysql+pymysql://developer:developer@172.28.217.66/xixiche?charset=utf8')
+        self.engine = sqlalchemy.create_engine('mysql+pymysql://'+username+':'+password+'@'+host+'/'+dbname+'?charset=utf8')
 
     def get_conn(self):
         conn = self.engine.connect();
@@ -77,13 +77,13 @@ class SQLiteWraper(object):
             y = x - (x*x-a)/(2*x)
         return x
 if __name__=='__main__':
-    db = SQLiteWraper();
+    db = SQLiteWraper('developer','developer','172.28.217.66','xixiche');
     # data_merchant = db.execute("select * from data_merchant")
     # for row in data_merchant:
     #     print(row.items())
     print(db.sqrt(100))
     testsql = [];
-    for i in range(1,1):
+    for i in range(1,10):
         testsql.append("insert into test (name,test_bigint) values ('hehe','"+str(i)+"')")
     print("sqllist prepared")
     db.batch(testsql)
