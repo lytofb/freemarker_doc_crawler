@@ -30,14 +30,9 @@ def mysmbcon_factory(host,remote_server,username,password,my_name='default_name'
     conn = MySMBConnection(username, password, my_name, remote_name, use_ntlm_v2 = use_ntlm_v2)
     conn.connect(host, port)
     return conn;
-# MySMBConnection = type('MySMBConnection',(SMBConnection,),{"listpath_ex":listpath_ex,"remote_sv":'knose'})
-# conn = MySMBConnection('root', 'p@ssw0rd', 'lytofb', 'root', use_ntlm_v2 = True)
-# conn.connect('172.28.217.66', 139)
-conn = mysmbcon_factory('172.28.217.66','knose','root','p@ssw0rd')
-smbresult = conn.smbwalk("/maven")
-for r in smbresult:
-    print(r)
-# shares = conn.listShares()
-# dircontents = conn.listpath_ex('/')
-# for dirc in dircontents:
-#     print(dirc.filename,dirc.isDirectory)
+
+if __name__=="__main__":
+    conn = mysmbcon_factory('172.28.217.66','knose','root','p@ssw0rd')
+    smbresult = conn.smbwalk("/maven")
+    for r in smbresult:
+        print(r)
