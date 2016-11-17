@@ -5,23 +5,40 @@ from bs4 import BeautifulSoup;
 import download_file;
 import re;
 import config;
+import json;
 
-def getsession(header_para = None):
+def loadheaders_from_har(harfile):
+    headers={}
+    with open(harfile,encoding="utf-8") as data_file:
+        data = json.load(data_file)
+    entries = data['log']['entries']
+    mainentry = entries[0]
+    request_object = mainentry['request']
+    response_object = mainentry['response']
+    for headerpair in request_object['headers']:
+        _is_legal_header_name = re.compile(r'[^:\s][^:\r\n]*').fullmatch
+        if _is_legal_header_name(headerpair['name']):
+            headers[headerpair['name']]=headerpair['value']
+    return headers
+
+def getsession(header_para = None,harfile=None):
     if header_para:
         headers = header_para
+    elif harfile:
+        headers = loadheaders_from_har(harfile)
     else :
         headers = {"Accept":'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
                    'Accept-Encoding':'gzip, deflate, sdch',
                    'Accept-Language':'zh-CN,zh;q=0.8',
-                   'Upgrade-Insecure-Requests':1,
+                   'Upgrade-Insecure-Requests':'1',
                    'Connection':'keep-alive,Host:freemarker.org',
                    'User-Agent':"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36'"}
     req_session = requests.session();
     req_session.headers.update(headers)
     return req_session;
 
-def getsoup_by_url(url,header=None,encoding=None):
-    session = getsession(header);
+def getsoup_by_url(url,header=None,encoding=None,harfile=None):
+    session = getsession(header,harfile);
     response = session.get(url)
     if encoding:
         response.encoding = encoding;
