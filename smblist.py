@@ -32,7 +32,11 @@ def mysmbcon_factory(host,remote_server,username,password,my_name='default_name'
     return conn;
 
 if __name__=="__main__":
-    conn = mysmbcon_factory('172.28.217.66','knose','root','p@ssw0rd')
-    smbresult = conn.smbwalk("/maven")
+    # conn = mysmbcon_factory('192.168.1.1','Expansion_Drive(1)','admin','Ab860813')
+    # conn.listShares()
+    # smbresult = conn.smbwalk("/qzfs/yy/aido")
+    conn = mysmbcon_factory('127.0.0.1','LYTOFB-PC','root','root')
+    conn.listShares()
+    smbresult = conn.smbwalk("/qzfs/yy/aido")
     for r in smbresult:
         print(r)
