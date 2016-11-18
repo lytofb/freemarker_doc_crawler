@@ -52,12 +52,31 @@ class SQLiteWraper(object):
             return -2
         return 0
 
+    @time_counter
     @conn_trans
-    def select(self,sql,conn=None):
+    def tplbatch(self,sqltpl,*params,conn=None):
+        trans = conn.begin()
+        try:
+            for param in params:
+                conn.execute(sqltpl,param)
+            trans.commit()
+        except pymysql.IntegrityError as e:
+            #print e
+            return -1
+        except Exception as e:
+            print (e)
+            return -2
+        return 0
+
+    @conn_trans
+    def select(self,sql,*param,conn=None):
         resultdictlist = []
         trans = conn.begin()
         try:
-            result = conn.execute(sql)
+            if param:
+                result = conn.execute(sql,param)
+            else:
+                result = conn.execute(sql)
             for row in result:
                 resultdict={};
                 for t in row.items():
@@ -73,10 +92,13 @@ class SQLiteWraper(object):
         return resultdictlist
 
     @conn_trans
-    def execute(self,sql,conn=None):
+    def execute(self,sql,*param,conn=None):
         trans = conn.begin()
         try:
-            result = conn.execute(sql)
+            if param:
+                result = conn.execute(sql,param)
+            else:
+                result = conn.execute(sql)
             trans.commit()
         except pymysql.IntegrityError as e:
             #print e
@@ -85,6 +107,18 @@ class SQLiteWraper(object):
             print (e)
             return -2
         return result
+
+    def isunique(self,tablename,colulmnname,columnvalue):
+        if columnvalue is not tuple:
+            params = columnvalue,
+        selectsql = "select count(1) as record_count from "+tablename+" where "+colulmnname+" =%s"
+        result = self.select(selectsql,*params)
+        if (type(result) is int):
+            print("error in check unique")
+        elif result[0]["record_count"]>0:
+            return False;
+        else:
+            return True;
 
     @time_counter
     def sqrt(self,a, eps=1e-10):
@@ -97,13 +131,21 @@ class SQLiteWraper(object):
             y = x - (x*x-a)/(2*x)
         return x
 if __name__=='__main__':
+    param = ('1',8385707)
     db = SQLiteWraper('developer','developer','172.28.217.66','xixiche');
-    data_merchant = db.select("select * from data_merchant")
-    for row in data_merchant:
-        print(row.items())
-    # print(db.sqrt(100))
+    ##################check unique#########
+    check_result = db.isunique("data_user","user_name","qgy")
+    print(check_result);exit(0)
+    ##################select,select with params##############################
+    # data_merchant = db.select("select * from data_merchant")
+    # data_merchant = db.select("select * from data_merchant where enabled = %s and tel_num = %s",*param)
+    # for row in data_merchant:
+    #     print(row.items())
+    ##################batch,batch with params##############################
+    sqltpl = "insert into test (name,test_bigint) values (%s,%s)"
+    params = [('1',8385707),('2',8385707)]
+    db.tplbatch(sqltpl,*params)
     # testsql = [];
     # for i in range(1,10):
     #     testsql.append("insert into test (name,test_bigint) values ('hehe','"+str(i)+"')")
-    # print("sqllist prepared")
     # db.batch(testsql)
