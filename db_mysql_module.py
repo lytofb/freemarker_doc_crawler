@@ -93,6 +93,8 @@ class SQLiteWraper(object):
 
     @conn_trans
     def execute(self,sql,*param,conn=None):
+        if param is not tuple:
+            param = param,
         trans = conn.begin()
         try:
             if param:
