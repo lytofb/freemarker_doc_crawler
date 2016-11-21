@@ -39,6 +39,8 @@ def getsession(header_para = None,harfile=None):
 
 def getresponse_by_url(url,header=None,encoding=None,harfile=None,proxy=None,timeout=None):
     session = getsession(header,harfile);
+    if proxy:
+        print("using proxy ",proxy)
     response = session.get(url,proxies=proxy,timeout=timeout)
     if encoding:
         response.encoding = encoding;
