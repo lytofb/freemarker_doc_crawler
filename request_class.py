@@ -37,11 +37,15 @@ def getsession(header_para = None,harfile=None):
     req_session.headers.update(headers)
     return req_session;
 
-def getsoup_by_url(url,header=None,encoding=None,harfile=None,proxy=None):
+def getresponse_by_url(url,header=None,encoding=None,harfile=None,proxy=None,timeout=None):
     session = getsession(header,harfile);
-    response = session.get(url,proxies=proxy)
+    response = session.get(url,proxies=proxy,timeout=timeout)
     if encoding:
         response.encoding = encoding;
+    return response;
+
+def getsoup_by_url(url,header=None,encoding=None,harfile=None,proxy=None,timeout=None):
+    response = getresponse_by_url(url,header,encoding,harfile,proxy,timeout)
     soup = BeautifulSoup(response.text, "html.parser")
     return soup;
 
