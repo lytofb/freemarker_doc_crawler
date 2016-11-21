@@ -23,6 +23,7 @@ class proxypool(object):
 
     def loadpooltomem(self):
         try:
+            print("loading proxy to mem")
             availableresult = self.db.select("select * from proxylist where enabled = 1 and costtime <4");
             result = self.db.select("select * from proxylist");
             for record in result:
@@ -55,19 +56,23 @@ class proxypool(object):
                 continue
         return None;
 
+    def getproxy(self):
+        if len(self.copiedpool)>0:
+            if len(self.availablepool)>0:
+                self.copyavailablepool()
+                proxyobj = self.copiedpool.pop()
+            else:
+                return None;
+        else:
+            proxyobj = self.copiedpool.pop()
+        return proxyobj;
+
     def retryurl(self,times,url):
         if times>0:
             times = times -1;
             try:
-                if len(self.copiedpool)>0:
-                    proxyobj = self.copiedpool.pop()
-                    # proxyobj = random.choice(self.copiedpool)
-                    soup = request_class.getsoup_by_url(url,proxy=proxyobj,timeout=proxyobj["costtime"]+2,harfile=self.harfile)
-                elif len(self.availablepool)>0:
-                    self.copyavailablepool()
-                else:
-                    print("no proxy using")
-                    soup = request_class.getsoup_by_url(url,harfile=self.harfile)
+                proxyobj = self.getproxy();
+                soup = request_class.getsoup_by_url(url,proxy=proxyobj,timeout=proxyobj["costtime"]+2,harfile=self.harfile)
                 return soup;
             except Exception as e:
                 return self.retryurl(times,url)
@@ -204,12 +209,12 @@ def toptestproxy(p,db):
         updatestatus(id,0)
 
 if __name__=="__main__":
-    px = proxypool('developer','developer','172.28.217.66','smzdmcrawl',False)
+    px = proxypool('developer','developer','172.28.217.66','smzdmcrawl',True)
     targetpl = ["http://www.kuaidaili.com/free/inha/"]
     # px.importproxy("C:\\Users\\octnn\\Downloads\\daxiang.txt")
     daxiangapi = "http://tpv.daxiangdaili.com/ip/?tid=559083828707040&num=10&delay=1&foreign=none&filter=on";
     # daxiangapi = "http://tpv.daxiangdaili.com/ip/?tid=559083828707040&num=500";
-    px.retrieveproxy(daxiangapi)
+    # px.retrieveproxy(daxiangapi)
     px.multi_test_proxy()
     # px.crawl_proxyurl_inorder(targetpl)
 
@@ -228,7 +233,9 @@ if __name__=="__main__":
 #   `ip` varchar(255) DEFAULT NULL,
 #   `port` varchar(255) DEFAULT NULL,
 #   `type` varchar(255) DEFAULT NULL,
+#   `proxy_source` varchar(255) DEFAULT NULL,
+#   `costtime` int(11) DEFAULT NULL,
 #   `enabled` int(11) DEFAULT '1',
 #   `createtime` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 #   PRIMARY KEY (`id`)
-# ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+# ) ENGINE=InnoDB AUTO_INCREMENT=1086 DEFAULT CHARSET=utf8;
