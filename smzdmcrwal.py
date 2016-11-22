@@ -7,7 +7,7 @@ from db_mysql_module import SQLiteWraper;
 from flask import Flask,jsonify
 from datetime import datetime;
 
-def _loadzmdajax(sorttime,harfile,zdmajaxtpl="http://faxian.smzdm.com/json_more?filter=h1s183t0f0c0&type=new&timesort=",depth = 1):
+def _loadzmdajax(sorttime,harfile,zdmajaxtpl="http://faxian.smzdm.com/json_more?filter=h1s183t0f0c0&type=new&timesort=",depth = 2):
     ajaxsession = request_class.getsession(harfile=harfile)
     ajaxsession.headers.update({"X-Requested-With":"XMLHttpRequest","Referer":"http://faxian.smzdm.com/h1s183t0f0c0p1/"})
     resp = ajaxsession.get(zdmajaxtpl+sorttime)
@@ -27,10 +27,10 @@ def getdictobject(dictionary,key):
     else:
         return None;
 
-def crawlzdm():
+def crawlzdm(ajaxtpl,harfile):
     db = SQLiteWraper("developer","developer","172.28.217.66","smzdmcrawl");
-    harfile = "D:\\build\\jingxuan.har"
-    ajaxtpl="http://www.smzdm.com/json_more?timesort="
+    # harfile = "D:\\build\\jingxuan.har"
+    # ajaxtpl="http://www.smzdm.com/json_more?timesort="
     thistime = str(int(time.time()))
     jsono = loadzmdajax(thistime,harfile,ajaxtpl,1)
     stack=[]
@@ -75,7 +75,11 @@ def rendersuccess(data):
 
 @app.route("/")
 def zdmindex():
-    zdmcrwal = crawlzdm();
+    ajaxtpl="http://www.smzdm.com/json_more?timesort="
+    faxiantpl = "http://faxian.smzdm.com/json_more?type=new&timesort="
+    harfile = "D:\\build\\jingxuan.har";
+    faxianharfile="D:\\build\\faxian.har"
+    zdmcrwal = crawlzdm(faxiantpl,harfile);
     now = datetime.now()
     return rendersuccess(zdmcrwal)
 
