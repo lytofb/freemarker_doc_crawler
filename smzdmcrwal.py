@@ -4,6 +4,8 @@ import json;
 import time;
 import re;
 from db_mysql_module import SQLiteWraper;
+from flask import Flask,jsonify
+from datetime import datetime;
 
 def _loadzmdajax(sorttime,harfile,zdmajaxtpl="http://faxian.smzdm.com/json_more?filter=h1s183t0f0c0&type=new&timesort=",depth = 1):
     ajaxsession = request_class.getsession(harfile=harfile)
@@ -25,28 +27,7 @@ def getdictobject(dictionary,key):
     else:
         return None;
 
-
-# soup = request_class.getsoup_by_url("http://faxian.smzdm.com/h1s183t0f0c0p1/",harfile=harfile);
-# feedlist = soup.select("ul.feed-list-col li")
-# lasttimesort = feedlist[-1].attrs;
-# ajaxsession = request_class.getsession(harfile=harfile)
-# ajaxsession.headers.update({"X-Requested-With":"XMLHttpRequest","Referer":"http://faxian.smzdm.com/h1s183t0f0c0p1/"})
-# resp = ajaxsession.get("http://faxian.smzdm.com/json_more?filter=h1s183t0f0c0&type=new&timesort="+lasttimesort["timesort"])
-# responsejson = json.loads(resp.text);
-# for feed in feedlist:
-#     producttitle = feed.select(".feed-ver-title")[0]
-#     productprice = producttitle.find_next_siblings("div")[0].text
-#     productname = feed.select(".feed-ver-title a")[0].text
-#     smzdmlink = producttitle.find("a").attrs['href'];
-#     zdmid = smzdmlink.split("/")[-2]
-#     try:
-#         feedlink = feed.select(".feed-link-btn-inner a")[0].attrs['href']
-#     except Exception as e:
-#         feedlink = ""
-#     print(productname,productprice,smzdmlink,feedlink,"\n")
-
-
-if __name__=="__main__":
+def crawlzdm():
     db = SQLiteWraper("developer","developer","172.28.217.66","smzdmcrawl");
     harfile = "D:\\build\\jingxuan.har"
     ajaxtpl="http://www.smzdm.com/json_more?timesort="
@@ -85,7 +66,21 @@ if __name__=="__main__":
         if db.isunique("zdmcrawl","article_id",ptuple[5]):
             insertsql = "insert into zdmcrawl (gtmtitle,gtmbrand,gtmmall,gtmprice,gtmid,article_id,article_url,article_link,article_mall,article_mall_domain,article_price,article_title,article_top_category) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)";
             db.execute(insertsql,*ptuple)
+    return {'now':datetime.now(),'zdmcrawl':'success'}
 
+app = Flask(__name__)
+
+def rendersuccess(data):
+    return jsonify({'msg':'ok','code':200001,'data':data})
+
+@app.route("/")
+def zdmindex():
+    zdmcrwal = crawlzdm();
+    now = datetime.now()
+    return rendersuccess(zdmcrwal)
+
+if __name__=="__main__":
+    app.run();
 
 
 # CREATE TABLE `zdmcrawl` (
